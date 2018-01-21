@@ -14,11 +14,11 @@ lua-5.3/luajit-2.1, so the original copyright and license (MIT) was kept.
 Build
 ------
 
-A luarocks specs file is provided, so it should be possible to
-download/compile/install luachild using the command line
+A luarocks specs file is provided, so it is possible to build luachild using
+the command line
 
 ```
-luarocks install https://github.com/pocomane/luachild/luachild-0.1-1.rockspec
+luarocks make
 ```
 
 Usage
