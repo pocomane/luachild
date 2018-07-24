@@ -2,14 +2,15 @@
 -- utility
 
 local function test(a,b)
-  if type(a) == 'string' then
-    a = tostring(a):gsub('[\n\r]*$','')
-  end
-  if type(b) == 'string' then
-    b = tostring(b):gsub('[\n\r]*$','')
+  local function conv(c)
+    local i=string.byte(c)
+    if i<32 or i>127 then
+      return '\\x'..string.format('%X',i)
+    end
+    return c
   end
   local i = debug.getinfo(2)
-  print('CHECK(line:'..tostring(i.currentline)..')', tostring(a), '<->', tostring(b))
+  print('CHECK(line:'..tostring(i.currentline)..')', tostring(a):gsub('.',conv), '<->', tostring(b):gsub('.',conv))
   local ret,err = pcall(function()
     assert(a == b)
   end)
@@ -97,7 +98,7 @@ w:close()
 p:wait()
 got = r:read("*l")
 
-test(expect, got)
+test(expect:gsub('[\n\r]*$',''), got:gsub('[\n\r]*$',''))
 
 expect = 'hello world ' .. tostring(math.random())
 
@@ -123,7 +124,7 @@ w:close()
 p:wait()
 got = r:read("*l")
 
-test(expect, got)
+test(expect:gsub('[\n\r]*$',''), got:gsub('[\n\r]*$',''))
 
 expect = 'hello world ' .. tostring(math.random())
 
@@ -133,9 +134,20 @@ w:close()
 p:wait()
 got = r:read("*l")
 
-test(expect, got)
+test(expect:gsub('[\n\r]*$',''), got:gsub('[\n\r]*$',''))
 
 -- Sub-process result
+
+local function readall()
+  local f = io.open("tmp.out.txt","rb")
+  local size = f:seek('end',0)
+  f:seek('set',0)
+  local r = f:read(size)
+  f:close()
+  return r
+end
+
+local argdump = [[f=io.open('tmp.out.txt','wb') for i=0,#arg do f:write(arg[i],string.char(10)) end f:close()]]
 
 local r,w = lc.pipe()
 local p=lc.spawn{lua,'-e','os.exit(-123)',stdout=w}
@@ -143,6 +155,45 @@ w:close()
 local result = p:wait()
 
 test(result, -123)
+
+-- Single argument quote
+
+for c = 0, 255 do
+  local s = string.char(c)
+  if  c ~= 0  -- \0 - C string terminator issue
+  and c ~= 42 and c ~= 63 -- windows wildcard * and ? have issues
+  then
+    lc.spawn({lua,'-e',argdump, '--', 'o', s, 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+    local r = readall()
+    test(r, 'o\n'..s..'\no\n')
+  end
+end
+
+-- back slash quoting (sensible windows shenarios)
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\\no\n')
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\\\', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\\\\no\n')
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\n', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\n\no\n')
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\\\n', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\\\n\no\n')
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\"o', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\"o\no\n')
+
+lc.spawn({lua,'-e',argdump, '--', 'o', '\\\\"o', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
+local r = readall()
+test(r, 'o\n\\\\"o\no\n')
 
 -- FULL !
 
@@ -156,7 +207,7 @@ end
 lc.setenv("ENV_DUMP", env_dump)
 
 local r,w = lc.pipe()
-local p = lc.spawn { './lua.exe', '-e', 'print(os.getenv("ENV_DUMP"))', stdout = w }
+local p = lc.spawn { lua, '-e', 'print(os.getenv("ENV_DUMP"))', stdout = w }
 local result = p:wait()
 w:close()
 
@@ -164,7 +215,7 @@ local o = r:read('*l')
 print(o)
 print('process returend:',result)
 
-test(o, env_dump)
+test(o:gsub('[\n\r]*$',''), env_dump:gsub('[\n\r]*$',''))
 test(o:match("PATH"), "PATH")
 test(result, 0)
 

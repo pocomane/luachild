@@ -116,28 +116,36 @@ struct spawn_params {
   STARTUPINFO si;
 };
 
+static void add_back_slash(luaL_Buffer *b, int bscount) {
+  int i;
+  for (i=0; i<bscount; i++)
+    luaL_addchar(b, '\\');
+}
+
 /* quotes and adds argument string to b */
 static int add_argument(luaL_Buffer *b, const char *s) {
-  int oddbs = 0;
+  int bscount = 0;
   luaL_addchar(b, '"');
   for (; *s; s++) {
     switch (*s) {
     case '\\':
-      luaL_addchar(b, '\\');
-      oddbs = !oddbs;
+      bscount += 1;
       break;
     case '"':
-      luaL_addchar(b, '\\');
-      oddbs = 0;
+      add_back_slash(b, 2*bscount+1);
+      luaL_addchar(b, '"');
+      bscount = 0;
       break;
     default:
-      oddbs = 0;
+      add_back_slash(b, bscount);
+      luaL_addchar(b, *s);
+      bscount = 0;
       break;
     }
-    luaL_addchar(b, *s);
   }
+  add_back_slash(b, 2*bscount);
   luaL_addchar(b, '"');
-  return oddbs;
+  return 0;
 }
 
 static struct spawn_params *spawn_param_init(lua_State *L)
@@ -156,10 +164,7 @@ static void spawn_param_filename(struct spawn_params *p)
   lua_State *L = p->L;
   luaL_Buffer b;
   luaL_buffinit(L, &b);
-  if (add_argument(&b, lua_tostring(L, 1))) {
-    luaL_error(L, "argument ends in odd number of backslashes");
-    return;
-  }
+  add_argument(&b, lua_tostring(L, 1));
   luaL_pushresult(&b);
   lua_replace(L, 1);
   p->cmdline = lua_tostring(L, 1);

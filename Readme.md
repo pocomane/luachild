@@ -77,6 +77,16 @@ converted to string to get some information about the sub-process.
 `lc.wait(process)` or `process:wait()` will wait for the end of the process. It
 will return the integer returned by the process.
 
+Known issues
+------------
+
+In the standard C, the command parameters are zero-terminated strings. So it is
+not possible to pass '\0' in a command line parameter to a subprocess.
+
+Moreover, under the Windows platform, the `spawn` function uses the
+`CreateProcess` API. It will expand the filesystem wildcard characters '* ' and
+'?' . So it is not possible to pass these charaters to the subprocess.
+
 Notes
 -----
 
