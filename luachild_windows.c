@@ -116,6 +116,16 @@ struct spawn_params {
   STARTUPINFO si;
 };
 
+static int need_quote(const char *s, size_t l){
+  int i = 0;
+  for (i=0;i<l;i++) {
+    const char c = s[i];
+    if (c < ' ' || c > '~') return 1; // ASCII Control OR non 7 bit
+    if (c == ' ' || c == '\\' || c == '"' ) return 1;
+  }
+  return 0;
+}
+
 static void add_back_slash(luaL_Buffer *b, int bscount) {
   int i;
   for (i=0; i<bscount; i++)
@@ -123,7 +133,7 @@ static void add_back_slash(luaL_Buffer *b, int bscount) {
 }
 
 /* quotes and adds argument string to b */
-static int add_argument(luaL_Buffer *b, const char *s) {
+static void quote_argument(luaL_Buffer *b, const char *s){
   int bscount = 0;
   luaL_addchar(b, '"');
   for (; *s; s++) {
@@ -145,7 +155,19 @@ static int add_argument(luaL_Buffer *b, const char *s) {
   }
   add_back_slash(b, 2*bscount);
   luaL_addchar(b, '"');
-  return 0;
+}
+
+static void add_argument(luaL_Buffer *b, const char *s) {
+  size_t l = strlen(s);
+  // Note: some windows applications parse directly the whole command line
+  // through the window API. So, for compatibility it is better to quote the
+  // arguments only when it is really needed. E.g. 'dir /?' will print help
+  // informations, while 'dir "/?"' will print an error.
+  if (need_quote(s,l)) {
+    quote_argument(b,s);
+  } else {
+    luaL_addlstring(b,s,l);
+  }
 }
 
 static struct spawn_params *spawn_param_init(lua_State *L)
