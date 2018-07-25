@@ -1,5 +1,5 @@
 package = "luachild"
-version = "0.1-1"
+version = "scm-1"
 source = {
   url = "git://github.com/pocomane/luachild",
 }

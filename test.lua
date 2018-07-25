@@ -156,7 +156,7 @@ local result = p:wait()
 
 test(result, -123)
 
--- Single argument quote
+-- Passing any character to the child process
 
 for c = 0, 255 do
   local s = string.char(c)
@@ -169,7 +169,7 @@ for c = 0, 255 do
   end
 end
 
--- back slash quoting (sensible windows shenarios)
+-- Passing some back slash patterns to the child process (sensible under windows shenarios)
 
 lc.spawn({lua,'-e',argdump, '--', 'o', '\\', 'o', stderr=io.stdout, stdout=io.stdout}):wait()
 local r = readall()
