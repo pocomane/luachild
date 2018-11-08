@@ -1,3 +1,5 @@
+#include "luachild.h"
+#ifdef USE_WINDOWS
 
 /*
  * Extracted from "ex" API implementation
@@ -15,8 +17,6 @@
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-
-#include "luachild.h"
 
 #define absindex(L,i) ((i)>0?(i):lua_gettop(L)+(i)+1)
 
@@ -67,7 +67,7 @@ static int push_error(lua_State *L) {
 
 /* name value -- true/nil error
  * name nil -- true/nil error */
-static int lc_setenv(lua_State *L)
+int lc_setenv(lua_State *L)
 {
   const char *nam = luaL_checkstring(L, 1);
   const char *val = lua_tostring(L, 2);
@@ -78,7 +78,7 @@ static int lc_setenv(lua_State *L)
 }
 
 /* -- environment-table */
-static int lc_environ(lua_State *L)
+int lc_environ(lua_State *L)
 {
   const char *nam, *val, *end;
   const char *envs = GetEnvironmentStrings();
@@ -93,7 +93,7 @@ static int lc_environ(lua_State *L)
   return 1;
 }
 
-static int lc_pipe(lua_State *L)
+int lc_pipe(lua_State *L)
 {
   if (!file_handler_creator(L, "COMSPEC", 1)) return 0;
   HANDLE ph[2];
@@ -304,7 +304,7 @@ static int spawn_param_execute(struct spawn_params *p)
 }
 
 /* proc -- exitcode/nil error */
-static int process_wait(lua_State *L)
+int process_wait(lua_State *L)
 {
   struct process *p = luaL_checkudata(L, 1, PROCESS_HANDLE);
   if (p->status == -1) {
@@ -319,7 +319,7 @@ static int process_wait(lua_State *L)
 }
 
 /* proc -- string */
-static int process_tostring(lua_State *L)
+int process_tostring(lua_State *L)
 {
   struct process *p = luaL_checkudata(L, 1, PROCESS_HANDLE);
   char buf[40];
@@ -357,7 +357,7 @@ static void get_redirect(lua_State *L,
 
 /* filename [args-opts] -- proc/nil error */
 /* args-opts -- proc/nil error */
-static int lc_spawn(lua_State *L)
+int lc_spawn(lua_State *L)
 {
   struct spawn_params *params;
   int have_options;
@@ -431,4 +431,6 @@ static int lc_spawn(lua_State *L)
   }
   return spawn_param_execute(params);   /* proc/nil error */
 }
+
+#endif // USE_WINDOWS
 

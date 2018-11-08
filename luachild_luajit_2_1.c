@@ -1,3 +1,5 @@
+#include "luachild.h"
+#ifdef USE_LUAJIT
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -5,8 +7,6 @@
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-
-#include "luachild.h"
 
 static int lua_report_type_error(lua_State *L, int narg, const char * tname) {
   return luaL_typerror(L, narg, tname);
@@ -75,4 +75,6 @@ static void lua_pushcfile(lua_State *L, FILE * f){
   FILE** iof = (FILE**)lua_touserdata(L, -1);
   if (iof) *iof = f;
 }
+
+#endif // USE_LUAJIT
 

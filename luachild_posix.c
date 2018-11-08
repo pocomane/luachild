@@ -1,3 +1,5 @@
+#include "luachild.h"
+#ifdef USE_POSIX
 
 /*
  * Extracted from "ex" API implementation
@@ -16,8 +18,6 @@
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-
-#include "luachild.h"
 
 #if __STDC_VERSION__ < 199901L
 #define restrict
@@ -431,4 +431,6 @@ static int lc_spawn(lua_State *L)
   }
   return spawn_param_execute(params);   /* proc/nil error */
 }
+
+#endif // USE_POSIX
 

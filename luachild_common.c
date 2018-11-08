@@ -16,7 +16,7 @@ int set_table_field(lua_State *L, const char * field_name){
   return 0;
 }
 
-int luaopen_luachild(lua_State *L)
+SHFUNC int luaopen_luachild(lua_State *L)
 {
   
   /* Process methods */

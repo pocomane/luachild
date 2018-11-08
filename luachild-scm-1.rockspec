@@ -29,7 +29,7 @@ build = {
         ["luachild"] = {
           defines = { "USE_POSIX" },
           incdirs = { "./" },
-          sources = { "luachild.c" },
+          sources = { "luachild_common.c", "luachild_lua_5_3.c", "luachild_luajit_2_1.c", "luachild_posix.c", "luachild_windows.c", }
         },
       },
     },
@@ -39,7 +39,7 @@ build = {
         ["luachild"] = {
           defines = { "USE_WINDOWS" },
           incdirs = { "./" },
-          sources = { "luachild.c" },
+          sources = { "luachild_common.c", "luachild_lua_5_3.c", "luachild_luajit_2_1.c", "luachild_posix.c", "luachild_windows.c", }
         },
       },
     },
