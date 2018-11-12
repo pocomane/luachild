@@ -8,8 +8,12 @@ compatible with lua 5.3 and luajit 2.1 and it works under windows and any os
 with posix spawn+environ api (e.g. linux).
 
 The code was extracted from the [LuaDist Ex](https://github.com/LuaDist/luaex)
-module. Only few modification were made in order to adapt it to
-lua-5.3/luajit-2.1, so the original copyright and license (MIT) was kept.
+module. Very few modification were made, so the original license (MIT) was
+kept, Copyright 2007 Mark Edgar.
+
+If you need a legal statement for these changes, please refer to the
+[Unlicense](http://unlicense.org) text in the COPYING.txt file. It also applies
+to any file without any explicit distribution statement.
 
 Build
 ------
