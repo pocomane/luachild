@@ -75,7 +75,7 @@ extern int push_error(lua_State *L)
 
 /* name value -- true/nil error
  * name nil -- true/nil error */
-static int lc_setenv(lua_State *L)
+int lc_setenv(lua_State *L)
 {
   const char *nam = luaL_checkstring(L, 1);
   const char *val = lua_tostring(L, 2);
@@ -86,7 +86,7 @@ static int lc_setenv(lua_State *L)
 }
 
 /* -- environment-table */
-static int lc_environ(lua_State *L)
+int lc_environ(lua_State *L)
 {
   const char *nam, *val, *end;
   const char **env;
@@ -109,7 +109,7 @@ static int closeonexec(int d)
 }
 
 /* -- in out/nil error */
-static int lc_pipe(lua_State *L)
+int lc_pipe(lua_State *L)
 {
   if (!file_handler_creator(L, "/dev/null", 0)) return 0;
   int fd[2];
@@ -204,7 +204,7 @@ struct process {
 };
 
 /* proc -- exitcode/nil error */
-static int process_wait(lua_State *L)
+int process_wait(lua_State *L)
 {
   struct process *p = luaL_checkudata(L, 1, PROCESS_HANDLE);
   if (p->status == -1) {
@@ -218,7 +218,7 @@ static int process_wait(lua_State *L)
 }
 
 /* proc -- string */
-static int process_tostring(lua_State *L)
+int process_tostring(lua_State *L)
 {
   struct process *p = luaL_checkudata(L, 1, PROCESS_HANDLE);
   char buf[40];
@@ -380,7 +380,7 @@ static void get_redirect(lua_State *L,
 
 /* filename [args-opts] -- proc/nil error */
 /* args-opts -- proc/nil error */
-static int lc_spawn(lua_State *L)
+int lc_spawn(lua_State *L)
 {
   struct spawn_params *params;
   int have_options;

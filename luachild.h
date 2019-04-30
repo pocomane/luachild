@@ -40,8 +40,5 @@ int file_handler_creator(lua_State *L, const char * file_path, int get_path_from
 
 void lua_pushcfile(lua_State *L, FILE * f);
 
-// The only function to be exposed
-int luaopen_luachild(lua_State *L);
-
 #endif // _LUA_CHILD_H_
 
