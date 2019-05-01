@@ -150,11 +150,11 @@ end
 local argdump = [[f=io.open('tmp.out.txt','wb') for i=0,#arg do f:write(arg[i],string.char(10)) end f:close()]]
 
 local r,w = lc.pipe()
-local p=lc.spawn{lua,'-e','os.exit(-123)',stdout=w}
+local p=lc.spawn{lua,'-e','os.exit(123)',stdout=w}
 w:close()
 local result = p:wait()
 
-test(result, -123)
+test(result, 123)
 
 -- Passing any character to the child process
 
