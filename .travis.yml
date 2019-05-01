@@ -1,0 +1,48 @@
+language: c
+
+os:
+  - linux
+  - osx
+
+env:
+  global:
+    - LUA_PATH="./?.lua"
+    - LUA_CPATH="./?.so"
+    - LUAROCKS_ROOT="$TRAVIS_BUILD_DIR/install/luarocks"
+    - PATH="$PATH:$LUAROCKS_ROOT/bin"
+  matrix:
+    - LUAVM="puc"
+    - LUAVM="jit"
+
+branches:
+  only:
+    - master
+
+install:
+  - if [ "$LUAVM" = "puc" ]; then wget http://www.lua.org/ftp/lua-5.3.5.tar.gz ; fi
+  - if [ "$LUAVM" = "puc" ]; then tar -xzf lua-5.3.5.tar.gz ; fi
+  - if [ "$LUAVM" = "puc" ]; then cd lua-5.3.5 ; fi
+  - if [ "$LUAVM" = "puc" -a "$TRAVIS_OS_NAME" = "linux" ]; then make linux ; fi
+  - if [ "$LUAVM" = "puc" -a "$TRAVIS_OS_NAME" = "osx" ]; then make macosx ; fi
+  - if [ "$LUAVM" = "puc" ]; then sudo make install ; fi
+  - if [ "$LUAVM" = "puc" ]; then sudo make install ; fi
+  - if [ "$LUAVM" = "jit" ]; then wget http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz ; fi
+  - if [ "$LUAVM" = "jit" ]; then tar -xzf LuaJIT-2.1.0-beta3.tar.gz ; fi
+  - if [ "$LUAVM" = "jit" ]; then cd LuaJIT-2.1.0-beta3 ; fi
+  - if [ "$LUAVM" = "jit" ]; then make ; fi
+  - if [ "$LUAVM" = "jit" ]; then sudo make install ; fi
+  - if [ "$LUAVM" = "jit" ]; then sudo ln -s "$(ls /usr/local/bin/luajit*|head -n 1)" /usr/local/bin/luajit ; fi
+  - cd ..
+  - wget https://luarocks.org/releases/luarocks-3.0.4.tar.gz
+  - tar zxpf luarocks-3.0.4.tar.gz
+  - cd luarocks-3.0.4
+  - ./configure --prefix="$LUAROCKS_ROOT"
+  - make build
+  - make install
+  - cd ..
+
+script:
+  - luarocks make
+  - if [ "$LUAVM" = "puc" ]; then lua test.lua ; fi
+  - if [ "$LUAVM" = "jit" ]; then luajit test.lua ; fi
+
