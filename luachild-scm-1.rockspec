@@ -19,7 +19,7 @@ supported_platforms = {
   "windows",
 }
 dependencies = {
-  "lua >= 5.2, <= 5.3",
+  "lua >= 5.1",
 }
 build = {
   platforms = {
