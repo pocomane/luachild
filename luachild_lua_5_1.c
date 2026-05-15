@@ -1,5 +1,6 @@
 #include "luachild.h"
 #ifdef USE_LUAPUC
+#if LUA_VERSION_NUM == 501
 
 #include <stdio.h>
 #include <errno.h>
@@ -40,10 +41,16 @@ int file_handler_creator(lua_State *L, const char * file_path, int get_path_from
 
 void lua_pushcfile(lua_State *L, FILE * f){
   FILE **pf = (FILE **)lua_newuserdata(L, sizeof(FILE *));
+  *pf = f;
   luaL_getmetatable(L, LUA_FILEHANDLE);
   lua_setmetatable(L, -2);
-  *pf = f;
+  // create and set an env table with a __close function field
+  lua_createtable(L, 0, 1);
+  lua_pushcfunction(L, file_close);
+  lua_setfield(L, -2, "__close");
+  lua_setfenv(L, -2);
 }
 
+#endif // LUA_VERSION_NUM == 501
 #endif // USE_LUAPUC
 
